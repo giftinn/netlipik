@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calistaflix</title>
+
+<style>
+* {
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body {
+  background:#141414;
+  color:white;
+  font-family:'Helvetica Neue', Arial, sans-serif;
+}
+
+/* LOGO */
+.logo {
+  position:absolute;
+  top:20px;
+  left:30px;
+  font-weight:bold;
+  color:#E50914;
+  letter-spacing:2px;
+}
+
+/* PAGE SYSTEM */
+.page {
+  display:none;
+  min-height:100vh;
+  width:100%;
+  padding:20px;
+}
+
+.page.active {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+}
+
+/* PROFILE */
+h1 {
+  margin-bottom:40px;
+  text-align:center;
+}
+
+.profiles {
+  display:flex;
+  gap:40px;
+}
+
+.profile {
+  text-align:center;
+  cursor:pointer;
+}
+
+.profile img {
+  width:140px;
+  height:140px;
+  object-fit:cover;
+  border-radius:12px;
+  transition:0.3s;
+}
+
+.profile:hover img {
+  border:3px solid #E50914;
+  transform:scale(1.05);
+}
+
+/* PIN */
+.pin-dots {
+  display:flex;
+  gap:10px;
+  margin-bottom:25px;
+}
+
+.dot {
+  width:14px;
+  height:14px;
+  border-radius:50%;
+  background:#333;
+}
+
+.dot.filled {
+  background:#E50914;
+}
+
+.keypad {
+  display:grid;
+  grid-template-columns:repeat(3,60px);
+  gap:15px;
+}
+
+.key {
+  width:60px;
+  height:60px;
+  border-radius:50%;
+  background:#222;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  cursor:pointer;
+  transition:0.3s;
+}
+
+.key:hover {
+  background:#E50914;
+}
+
+/* MOVIE PAGE */
+.movie-page {
+  padding:0;
+  align-items:stretch;
+  justify-content:flex-start;
+}
+
+.hero {
+  position:relative;
+  width:100%;
+  max-height:60vh;
+  overflow:hidden;
+}
+
+.hero video {
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.hero-overlay {
+  position:absolute;
+  bottom:0;
+  left:0;
+  right:0;
+  padding:20px;
+  background:linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+}
+
+.movie-content {
+  padding:20px;
+  max-width:900px;
+}
+
+.movie-title {
+  font-size:2rem;
+  margin-bottom:10px;
+}
+
+.meta {
+  font-size:0.9rem;
+  color:#bbb;
+  margin-bottom:15px;
+}
+
+.play-btn {
+  background:#E50914;
+  border:none;
+  padding:10px 20px;
+  color:white;
+  cursor:pointer;
+  font-weight:bold;
+  margin-bottom:15px;
+}
+
+.description {
+  font-size:0.95rem;
+  line-height:1.5;
+  color:#ddd;
+}
+
+/* DESKTOP */
+@media (min-width:900px) {
+
+  .movie-layout {
+    display:flex;
+  }
+
+  .hero {
+    width:60%;
+    max-height:80vh;
+  }
+
+  .movie-content {
+    width:40%;
+    padding:40px;
+  }
+}
+
+.episodes-section {
+  margin-top:40px;
+}
+
+.episodes-section h2 {
+  margin-bottom:20px;
+  font-size:1.2rem;
+}
+
+.episode-item {
+  display:flex;
+  gap:15px;
+  margin-bottom:20px;
+  cursor:pointer;
+  transition:0.3s;
+  align-items:center;
+}
+
+.episode-item img {
+  width:130px;
+  height:85px;
+  object-fit:cover;
+  border-radius:8px;
+}
+
+.episode-item:hover {
+  transform:scale(1.02);
+}
+
+.episode-info h3 {
+  font-size:1rem;
+}
+
+.episode-info p {
+  font-size:0.8rem;
+  color:#aaa;
+}
+
+.modal {
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.85);
+  display:none;
+  justify-content:center;
+  align-items:center;
+  padding:20px;
+  z-index:999;
+}
+
+.modal.active {
+  display:flex;
+}
+
+.modal-content {
+  background:#181818;
+  width:100%;
+  max-width:750px;
+  max-height:90vh;
+  border-radius:12px;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+}
+
+.modal-media img,
+.modal-media video {
+  width:100%;
+  max-height:300px;
+  object-fit:cover;
+}
+
+.modal-letter {
+  padding:20px;
+  overflow-y:auto;
+  line-height:1.6;
+  color:#ddd;
+  flex:1;
+}
+
+.close-btn {
+  position:absolute;
+  top:20px;
+  right:25px;
+  font-size:26px;
+  cursor:pointer;
+}
+
+@media (min-width:900px){
+  .episode-item img {
+    width:180px;
+    height:110px;
+  }
+}
+
+video::-webkit-media-controls {
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+video:hover::-webkit-media-controls {
+  opacity: 1;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="logo">LOVEFLIX</div>
+
+<!-- PAGE 1 -->
+<section id="profilePage" class="page active">
+  <h1>Who's watching?</h1>
+  <div class="profiles">
+    <div class="profile" onclick="goToPin()">
+      <img src="1.jpg">
+      <p>My Love</p>
+    </div>
+  </div>
+</section>
+
+<!-- PAGE 2 -->
+<section id="pinPage" class="page">
+  <h1>Enter PIN</h1>
+
+  <div class="pin-dots">
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+  </div>
+
+  <div class="keypad">
+    <div class="key" onclick="pressNumber('1')">1</div>
+    <div class="key" onclick="pressNumber('2')">2</div>
+    <div class="key" onclick="pressNumber('3')">3</div>
+    <div class="key" onclick="pressNumber('4')">4</div>
+    <div class="key" onclick="pressNumber('5')">5</div>
+    <div class="key" onclick="pressNumber('6')">6</div>
+    <div class="key" onclick="pressNumber('7')">7</div>
+    <div class="key" onclick="pressNumber('8')">8</div>
+    <div class="key" onclick="pressNumber('9')">9</div>
+    <div></div>
+    <div class="key" onclick="pressNumber('0')">0</div>
+    <div></div>
+  </div>
+</section>
+
+<!-- PAGE 3 -->
+<section id="moviePage" class="page movie-page">
+  <div class="movie-layout">
+
+    <div class="hero">
+      <!-- GANTI VIDEO DI SINI -->
+      <video id="mainVideo" src="vid1.mp4" controls></video>
+      <div class="hero-overlay">
+      </div>
+    </div>
+
+    <div class="movie-content">
+      <div class="movie-title">Always Stay With Me</div>
+      <div class="meta">2025 • 1 Special Episode • HD</div>
+      <div class="description">
+        Under your starlit shadow, I once wandered through a life 
+        where loving you felt far beyond my reach. From that moment,
+        I knew the universe wrote us in the same constellation —
+        and my heart never let go.
+      </div>
+    </div>
+  </div>
+  
+  <div class="episodes-section">
+  <h2>Episodes</h2>
+
+  <div class="episode-item" onclick="openModal('ep1')">
+    <img src="22.jpg">
+    <div class="episode-info">
+      <h3>Under Your Starlit Shadow</h3>
+      <p>1h 3m</p>
+    </div>
+  </div>
+
+  <div class="episode-item" onclick="openModal('ep2')">
+    <img src="3.jpg">
+    <div class="episode-info">
+      <h3>When Our Eyes Collide</h3>
+      <p>1h 12m</p>
+    </div>
+  </div>
+
+  <div class="episode-item" onclick="openModal('ep3')">
+    <img src="1.jpg">
+    <div class="episode-info">
+      <h3>Milisecond You</h3>
+      <p>1h 7m</p>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="modal">
+  <div class="close-btn" onclick="closeModal()">✕</div>
+
+  <div class="modal-content">
+    <div class="modal-media" id="modalMedia"></div>
+    <div class="modal-letter" id="modalLetter"></div>
+  </div>
+</div>
+</section>
+
+<script>
+let correctPin = "1234";
+let inputPin = "";
+
+function goToPin(){
+  document.getElementById("profilePage").classList.remove("active");
+  document.getElementById("pinPage").classList.add("active");
+}
+
+function pressNumber(num){
+  if(inputPin.length < 4){
+    inputPin += num;
+    updateDots();
+  }
+
+  if(inputPin.length === 4){
+    setTimeout(()=>{
+      if(inputPin === correctPin){
+        document.getElementById("pinPage").classList.remove("active");
+        document.getElementById("moviePage").classList.add("active");
+      } else {
+        inputPin="";
+        updateDots();
+      }
+    },200);
+  }
+}
+
+function updateDots(){
+  let dots=document.querySelectorAll(".dot");
+  dots.forEach((dot,index)=>{
+    dot.classList.toggle("filled", index < inputPin.length);
+  });
+}
+
+ const video = document.getElementById("mainVideo");
+    const btn = document.getElementById("playBtn");
+
+    function toggleVideo(){
+      if(video.paused){
+        video.play();
+        btn.innerHTML = "❚❚ Pause";
+      } else {
+        video.pause();
+        btn.innerHTML = "▶ Play";
+      }
+    }
+
+    video.addEventListener("click", function(){
+      toggleVideo();
+    });
+
+    video.addEventListener("ended", function(){
+      btn.innerHTML = "▶ Play";
+    });
+
+function openModal(type){
+  const modal = document.getElementById("modal");
+  const media = document.getElementById("modalMedia");
+  const letter = document.getElementById("modalLetter");
+
+  modal.classList.add("active");
+
+  if(type === "ep1"){
+    media.innerHTML = `
+      <video src="vid1.mp4" controls></video>
+    `;
+    letter.innerHTML = `
+      <p>
+      Sempat aku menjadi pengelana yang gemar merayakan sunyi, mengira bahwa kesendirian adalah pelindung paling kokoh dari lara. Kubangun benteng tinggi dari bongkahan ragu, memastikan tak ada satu pun rasa yang mampu mengetuk pintu. Namun, semesta rupanya menyimpan rahasia paling indah dalam banyolan takdirnya. Ia menghadirkanmu—Jackash Hugo—seperti embun yang jatuh tanpa aba-aba, namun membawa tenang yang selama ini tak pernah kutemukan muaranya. 
+
+      Menyaksikan setiap detak dalam bingkai video ini, aku kembali disadarkan; bahwa hadirmu bukanlah sekadar penggenap, melainkan jawaban atas segala tanya yang sempat kupasrahkan pada waktu. Layaknya senandung dalam lagu ini, aku pernah menjadi jiwa yang tersesat dalam rimba tak menentu, hingga akhirnya langkahku terhenti pada teduh matamu. Kau membasuh luka yang tak pernah kau goreskan, dan mencintaiku dengan ketulusan yang membuatku merasa menjadi wanita paling beruntung di bawah kolong langit ini. 
+      </p>
+    `;
+  }
+
+  if(type === "ep2"){
+    media.innerHTML = `<img src="22.jpg">`;
+    letter.innerHTML = `
+      <p>
+      The universe pauses whenever our eyes meet...
+      (LETTER PANJANG DISINI JUGA)
+      </p>
+    `;
+  }
+
+  if(type === "ep3"){
+    media.innerHTML = `<img src="3.jpg">`;
+    letter.innerHTML = `
+      <p>
+      How your laughter rewrites my darkest days...
+      (LETTER PANJANG DISINI JUGA)
+      </p>
+    `;
+  }
+}
+
+function closeModal(){
+  const modal = document.getElementById("modal");
+  modal.classList.remove("active");
+
+  const videos = modal.querySelectorAll("video");
+  videos.forEach(v => v.pause());
+
+  document.getElementById("modalMedia").innerHTML = "";
+}
+</script>
+
+</body>
+</html>
